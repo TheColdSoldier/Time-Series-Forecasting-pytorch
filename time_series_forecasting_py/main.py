@@ -49,7 +49,7 @@ criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Train the model
-epochs = 30  # Increased epochs for better learning
+epochs = 50  # Increased epochs for better learning
 for epoch in range(epochs):
     for inputs, targets in dataloader:
         optimizer.zero_grad()
