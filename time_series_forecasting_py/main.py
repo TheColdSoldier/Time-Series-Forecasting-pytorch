@@ -15,18 +15,16 @@ series = data['Close'].values.reshape(-1, 1)  # Use 'Close' prices for forecasti
 scaler = MinMaxScaler(feature_range=(0, 1))
 series = scaler.fit_transform(series)
 
+seq_length = 40
 # Prepare sequences
-def create_sequences(data, seq_length):
-    sequences, labels = [], []
-    for i in range(len(data) - seq_length):
-        sequences.append(data[i:i + seq_length])
-        labels.append(data[i + seq_length])
-    return np.array(sequences), np.array(labels)
+sequences, labels = [], []
+for i in range(len(series) - seq_length):
+    sequences.append(series[i:i + seq_length])
+    labels.append(series[i + seq_length])
 
-seq_length = 10  # Adjusted for longer dataset
-X, y = create_sequences(series, seq_length)
+X = np.array(sequences)
+y = np.array(labels) 
 
-# Convert to tensors
 X_train = torch.tensor(X, dtype=torch.float32)
 y_train = torch.tensor(y, dtype=torch.float32)
 
@@ -49,7 +47,7 @@ criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Train the model
-epochs = 30  # Increased epochs for better learning
+epochs = 100
 for epoch in range(epochs):
     for inputs, targets in dataloader:
         optimizer.zero_grad()
@@ -75,8 +73,9 @@ def predict(model, data, seq_length):
 # Generate predictions
 predicted_values = predict(model, series, seq_length)
 predicted_values = scaler.inverse_transform(predicted_values.reshape(-1, 1))
+# print(f'Predicted Close Price: {predicted_values[-1][0]:.4f}')
 
-# Plot actual vs predicted values
+# Plot
 plt.figure(figsize=(12,6))
 plt.plot(data.index[seq_length:], scaler.inverse_transform(series[seq_length:]), label='Actual Prices')
 plt.plot(data.index[seq_length:], predicted_values, label='Predicted Prices', linestyle='dashed')
@@ -85,5 +84,3 @@ plt.ylabel('Stock Price')
 plt.title('Actual vs Predicted Stock Prices')
 plt.legend()
 plt.show()
-
-print(f'Predicted Close Price: {predicted_values[-1][0]:.4f}')
